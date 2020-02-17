@@ -7,7 +7,6 @@
 library(rstan)
 library(LaplacesDemon)
 library(latex2exp)
-library(denstrip)
 set.seed(1)
 
 ####------------------------ Simulate Data ---------------------------------####
@@ -69,7 +68,11 @@ true_Psi = 5*pnorm(dose-5) - 5*pnorm(0:(K-2)-5)
 
 png("dose_response_curve.png")
 plot( dose, colMeans(Psi_draws), ylim=c(-4,4), 
-      col='blue', pch=20, ylab=TeX("$\\Psi(k)$"), type='o')
+      col='blue', pch=20, ylab=TeX("$\\Psi(k)$"), type='o',axes=F)
+
+axis_labs = paste0(dose, " \n (n=",table(A[A!=0]),")")
+axis(side = 1, seq(1:(K-1)), labels = axis_labs,tick = T, padj = .5)
+axis(side = 2, seq(-4,4,1), labels = seq(-4,4,1), tick = T)
 
 ### Plot posterior credible Band 
 colfunc <- colorRampPalette(c("white", "skyblue"))
