@@ -78,8 +78,8 @@ axis(side = 1,
 axis(side = 2, at = seq(-1,3,.5), labels = seq(-1,3,.5))
 
 ### Plot posterior credible Band 
-colfunc <- colorRampPalette(c("white", "steelblue"))
-ci_perc = seq(.995,.005,-.001)
+colfunc <- colorRampPalette(c("white", "skyblue"))
+ci_perc = seq(.99,.01,-.01)
 colvec = colfunc(length(ci_perc))
 names(colvec) = ci_perc
 
@@ -89,7 +89,7 @@ for(i in ci_perc){
           col = colvec[as.character(i)], border = FALSE)
 }
 ###
-lines(0:8, post_means, type='l', col='blue')
+lines(0:8, post_means, type='l', col='steelblue')
 abline(h=0, lty=2)
 
 legend("topright", 
@@ -99,7 +99,8 @@ dev.off()
 
 png('gcomp_psi.png')
 hist( (mu1 - mu0 )/ sd(mu1 - mu0), freq=F,
-      xlab=TeX('Posterior Draws of $\\Psi$'), col='steelblue',
-      main='')
+      xlab=TeX('Posterior Draws of $\\Psi$'), col='skyblue',
+      main='', ylim=c(0,.401))
+lines(density((mu1 - mu0 )/ sd(mu1 - mu0)), col='steelblue')
 dev.off()
 
