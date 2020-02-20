@@ -36,8 +36,8 @@ model {
   // specify ridge prior shrinking aggressivly backward in time.
   for(t in 2:Nt){
     for(b in st[t-1]:ed[t-1] ){
-     beta_L[b] ~ normal(0, ( 1.1^(b - st[t-1]) ) * .1 );
-     theta[b] ~  normal(0, ( 1.1^(b - st[t-1]) ) * .1 );
+     beta_L[b] ~ normal(0, ( 1.5^(b - st[t-1]) ) * 1 );
+     theta[b] ~  normal(0, ( 1.5^(b - st[t-1]) ) * 1 );
     }
   }
   
