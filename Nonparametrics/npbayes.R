@@ -1,6 +1,6 @@
-install.packages('fdm2id',dependencies = T)
-library(fdm2id)
+devtools::install_github("StableMarkets/ChiRP",ref = 'fast-reg')
 library(ChiRP)
+
 library(BayesTree)
 library(rstan)
 library(gtools)
@@ -31,10 +31,8 @@ d_train = d[test==0, ]
 d_test = d[test==1, ]
 
 set.seed(2)
-res=NDPMix(d_train = d_train, formula = Y ~ X, d_test = d_test, 
-           iter=1000, burnin=500, 
-           phi_y = c(10,10), beta_var_scale = 50, 
-           init_k = 10, mu_scale = 1, tau_scale = .001)
+res=fDPMix(d_train = d_train, formula = Y ~ X, d_test = d_test, 
+           iter=1000, burnin=500,init_k = 10)
 
 
 png('dp_oscil.png')
@@ -45,7 +43,7 @@ plot(d$X, d$Y, pch=20,
 
 ### Plot posterior credible Band 
 colfunc <- colorRampPalette(c("white", "skyblue"))
-ci_perc = seq(.80,.01,-.01)
+ci_perc = seq(.99,.01,-.01)
 colvec = colfunc(length(ci_perc))
 names(colvec) = ci_perc
 
@@ -53,7 +51,7 @@ X_draw = c(d_train$X, d_test$X)
 ord = order(X_draw)
 
 X_draw = X_draw[ord]
-res_stack = rbind(res$predictions$train, res$predictions$test)
+res_stack = rbind(res$train, res$test)
 res_stack = res_stack[ord,]
 
 for(i in ci_perc){
@@ -68,7 +66,7 @@ axis(1, -2:2, -2:2)
 axis(2, -3:3, -3:3)
 
 points(d$X, d$Y, pch=20, col=ifelse(test==1,'pink','gray'))
-points(d$X, rowMeans(res_stack), col='steelblue', pch=20, type='o')
+lines(d$X, rowMeans(res_stack), col='steelblue', pch=20)
 dev.off()
 
 #### ----------------------- BART Model         ----------------------------####
