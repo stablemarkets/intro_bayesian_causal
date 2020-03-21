@@ -7,10 +7,10 @@
 library(rstan)
 library(LaplacesDemon)
 library(latex2exp)
-set.seed(1)
+set.seed(66)
 
 ####------------------------ Simulate Data ---------------------------------####
-N = 300 # sample size
+N = 500 # sample size
 warmup = 1000
 iter = 2000
 n_draws = iter - warmup
@@ -33,11 +33,11 @@ stan_data = list(Y=Y, A=A, V=Vmat, W = Wmat,
 partial_pool_model = stan_model(file = "partial_pool.stan")
 
 stan_res = sampling(partial_pool_model, data = stan_data, 
-                    pars = c("odds_ratio", 'mu' ),
+                    pars = c("odds_ratio", 'mu', "overall_odds_ratio" ),
                     warmup = warmup, iter = iter, chains=1, seed=1)
 
 Psi_draws = extract(stan_res, pars='odds_ratio')[[1]]
-overall_mean = extract(stan_res, pars='mu')[[1]]
+overall_mean = extract(stan_res, pars='overall_odds_ratio')[[1]]
 
 ####------------------- Compute Frequentist Estimates   --------------------####
 
@@ -66,13 +66,13 @@ post_mean = colMeans(Psi_draws)
 
 png("ppooling_plot.png")
 
-plot(post_mean, pch=20, col='blue', ylim=c(0,10),
+plot(post_mean, pch=20, col='blue', ylim=c(0,5),
      ylab=TeX("$\\Psi(v)$"), xlab=TeX("$V$"), axes=F )
 
 axis_labs = paste0(v_strata, "\n(n=",table(V),")")
 
 axis(1, at = 1:5, labels = axis_labs, padj = .5 )
-axis(2, at = 0:10, labels = 0:10 )
+axis(2, at = 0:5, labels = 0:5 )
 
 
 ### Plot posterior credible Intervals 
@@ -89,10 +89,11 @@ for(i in ci_perc){
 
 points(post_mean, col='steelblue', pch=20, lwd=8)
 points(Psi_freq, col='black', pch=20, lwd=5)
-abline(h= mean(exp(overall_mean)), col='black', lty=2)
+abline(h= mean(overall_mean), col='steelblue', lty=2)
 
 legend('topleft', 
-       legend = c('Posterior Mean/Credible Band', 'MLE'),
-       col = c('steelblue', 'black'), pch=c(20,20), bty='n')
+       legend = c('Posterior Mean/Credible Band', 'MLE', "Overall Effect" ),
+       col = c('steelblue', 'black', 'steelblue' ), pch=c(20,20,NA),
+       lty = c(NA,NA,2), bty='n')
 
 dev.off()

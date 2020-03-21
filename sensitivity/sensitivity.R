@@ -17,15 +17,15 @@ iter = 1000
 n_draws = iter - warmup
 
 
-L1 = rnorm(N) 
-L2 = rnorm(N)
-A = rbern(N, prob = invlogit( 0 + 1*L1 + 1*L2 ) )
-Y = rnorm(N, mean = 0 + 1*A - 1*L1 -1*L2  , sd = 1 )
+L = rnorm(N) 
+U = rnorm(N)
+A = rbern(N, prob = invlogit( 0 + 1*L + 1*U ) )
+Y = rnorm(N, mean = 0 + 1*A - 1*L -1*U  , sd = 1 )
 
 # P=2 dimensions of model matrix
-X = model.matrix( ~ 1 + A + L1 )
+X = model.matrix( ~ 1 + A + L )
 
-stan_data = list(Y=Y, L=L1, A = A, N=N)
+stan_data = list(Y=Y, L=L, A = A, N=N)
 
 ####------------------------ Sample Posterior    ---------------------------####
 sa_model = stan_model(file = "sensitivity.stan")

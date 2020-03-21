@@ -14,10 +14,10 @@ library(latex2exp)
 bayes_boot = function(mu_a1, mu_a0){
   n = nrow(mu_a1)
   M = ncol(mu_a1)
-  bb_weights = rdirichlet(1, rep(1/n, n))
-  
   psi_post = numeric(M)
+  
   for(m in 1:M){
+    bb_weights = rdirichlet( 1, rep(1, n) )
     psi_post[m] = sum(bb_weights*( mu_a1[, m] - mu_a0[ , m] ))
   }
   
@@ -29,12 +29,12 @@ set.seed(1)
 
 N = 500
 L = rnorm(N)
-A = rbinom(N, 1, invlogit( 0 + 1*L ) )
-Y = rnorm(N, 10 + (0 + L + L^2 )*A , 1)
+A = rbinom(N, 1, invlogit(1 - .5*L ) )
+Y = rnorm(N, 0 + (L + .5*L^2 )*A , .2)
   
 plot(L, Y, col=ifelse(A==1, 'red','black'))
 
-d_train = data.frame(Y=scale(Y), A=A, L=scale(L))
+d_train = data.frame(Y=Y, A=A, L=L )
 
 d_a1 = data.frame(A=1, L=d_train$L)
 d_a0 = data.frame(A=0, L=d_train$L)
@@ -45,15 +45,19 @@ d_test = rbind(d_a1, d_a0)
 
 set.seed(2)
 res=fDPMix(d_train = d_train, formula = Y ~ L + A, d_test = d_test, 
-           iter=1000, burnin=500,init_k = 10)
+           iter=1000, burnin=500,init_k = 10 )
 
-psi_dp = bayes_boot( mu_a1 = res$test[1:N,], mu_a0 = res$test[(N+1):(2*N), ])
+psi_dp = bayes_boot( mu_a1 = res$test[1:N,], mu_a0 = res$test[(N+1):(2*N),])
+
+plot(L, Y, pch=20)
+points(L, rowMeans(res$test[1:N, ]), col='red', pch=20)
+points(L, rowMeans(res$test[(N+1):(2*N), ]), col='blue', pch=20)
 
 #### ----------------------- BART Model         ----------------------------####
 
 set.seed(3)
 bart_res = bart(x.train = d_train[, c('L','A') ], y.train = d_train$Y, 
-                x.test = d_test, ndpost = 500)
+                x.test = d_test, ndpost = 500, nskip = 500)
 
 bart_res_pred = t(bart_res$yhat.test)
 
@@ -75,7 +79,7 @@ stan_data <- list(N2=nrow(d_test),
                   D = ncol(x_test),
                   N1 = nrow(d_train),
                   x2 = x_test, 
-                  x1 = x_train, y1 = d_train$Y)
+                  x1 = x_train, y1 = d_train$Y )
 
 ## https://mc-stan.org/docs/2_22/stan-users-guide/gaussian-processes-chapter.html
 ## GP code from Stan site that implements Guassian Process regression with 
@@ -96,8 +100,6 @@ mu_a1 = gp_res_pred[1:N, ]
 mu_a0 = gp_res_pred[(N+1):(2*N), ]
 
 psi_gp = bayes_boot( mu_a1 = mu_a1, mu_a0 = mu_a0)
-hist(psi_gp)
-
 
 #### ----------------------- Linear Regression    --------------------------####
 
@@ -130,18 +132,20 @@ all_psi = cbind(psi_bart, psi_dp, psi_gp, psi_lm_boot)
 post_mean = colMeans(all_psi)
 
 
-plot(post_mean, pch=20, col='blue', ylim= c(0, 2),
+plot(post_mean, pch=20, col='blue', ylim= c(0, 1),
      ylab=TeX("$\\Psi$"), xlab=TeX("Model"), axes=F )
 
 axis_labs = c('BART', 'Dirichlet Process', 'Gaussian Process', 'Linear Model')
 
 axis(1, at = 1:4, labels = axis_labs, padj = .5 )
-axis(2, at = seq(0,2, .5), labels = seq(0,2, .5) )
+axis(2, at = seq(0,1, .2), labels = seq(0, 1, .2) )
 
 
 ### Plot posterior credible Intervals 
 colfunc <- colorRampPalette(c("white", "lightblue"))
 ci_perc = seq(.99,.01,-.01)
+# ci_perc = c(.95,.90,.80)
+# ci_perc = c(.95)
 colvec = colfunc(length(ci_perc))
 names(colvec) = ci_perc
 
@@ -152,7 +156,7 @@ for(i in ci_perc){
 ###
 
 points(post_mean, col='steelblue', pch=20, lwd=8)
-abline(h=1, col='red', lty=2)
+abline(h=.5, col='red', lty=2)
 
 legend('topleft',
        legend = c('Posterior Mean/Credible Band', 'True Value'),

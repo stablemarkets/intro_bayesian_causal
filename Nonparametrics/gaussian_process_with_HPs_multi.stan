@@ -74,9 +74,9 @@ model {
     L_K = cholesky_decompose(K);
   }
 
-  rho ~ inv_gamma(1, 1);
-  alpha ~ normal(0, 1);
-  sigma ~ normal(0, 3 );
+  rho ~ inv_gamma(5, 5);
+  alpha ~ std_normal();
+  sigma ~ std_normal();
 
   y1 ~ multi_normal_cholesky(mu, L_K);
 }
