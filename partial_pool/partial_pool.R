@@ -64,7 +64,7 @@ for(vf in 1:5){
 v_strata = 1:(ncol(Vmat)+1)
 post_mean = colMeans(Psi_draws)
 
-png("ppooling_plot.png")
+png("ppooling_plot.png", width = 600, height = 500)
 
 plot(post_mean, pch=20, col='blue', ylim=c(0,5),
      ylab=TeX("$\\Psi(v)$"), xlab=TeX("$V$"), axes=F )
