@@ -1,6 +1,7 @@
 <p float="center">
   <img src="/Nonparametrics/dp_oscil.png" width="300" />
-  <img src="/Nonparametrics/gp_oscil.png" width="300" /> 
+  <img src="/Nonparametrics/gp_oscil.png" width="300" />
+  <img src="/Nonparametrics/bart_oscil.png" width="300" /> 
 </p>
 
 # A Practical Introduction to Bayesian Estimation of Causal Effects: Parametric and Nonparametric Approaches
