@@ -5,15 +5,17 @@ The working paper (currently under review) can be found on arXiv: https://arxiv.
 
 ### Topics
 
+---
+
 The paper touches on the following topics
 - Standardization (i.e. g-computation in the point-treatment setting).
-- Bayesian bootstrapping. 
 - G-computation for time-varying treatments.
   - Estimating effects of static regimes.
   - Estimating effects of dynamic regimes.
 - Performing sensitivity analyses around causal assumptions via priors.
 
 In terms of Bayesian models we touch upon
+- Bayesian bootstrapping. 
 - Ridge-like and horseshoe priors for sparsity in high-dimensional regressions. 
 - Hierarchical priors that induce partial pooling of conditional causal effects.
 - Dirichlet Process (DP) priors.
@@ -21,9 +23,17 @@ In terms of Bayesian models we touch upon
 - Gaussian process (GP) priors.
 
 ### Software Dependencies.
-All code and analyses generated in R version 3.6.3. Particularly, we rely on `Stan` to fit Gaussian processes and parametric causal models. We rely on `ChiRP` (https://stablemarkets.github.io/ChiRPsite/index.html) to fit Dirichlet Process models. Finally, we rely on `BayesTree` to fit BART models.
+
+---
+
+All code and analyses generated in R version 3.6.3. Particularly, we rely on 
+- `Stan` to fit GPs and parametric causal models. 
+- `ChiRP` (https://stablemarkets.github.io/ChiRPsite/index.html) to fit DP models. 
+- `BayesTree` to fit BART models.
 
 ### Directory
+
+---
 
 - `dose_response`: contains code implementing model discussed in Section 3.1 of the paper. Code generates Figure 1a.
 - `partial_pool`: contains code implementing model discussed in Section 3.2. Code generates Figure 1b.
