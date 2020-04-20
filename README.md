@@ -1,3 +1,8 @@
+<p float="left">
+  <img src="/Nonparametrics/dp_oscil.png" width="100" />
+  <img src="/Nonparametrics/gp_oscil.png" width="100" /> 
+</p>
+
 # A Practical Introduction to Bayesian Estimation of Causal Effects: Parametric and Nonparametric Approaches
 
 This is the companion GitHub repository for the following working paper (currently under review): https://arxiv.org/abs/2004.07375 .
@@ -14,8 +19,6 @@ Please cite the code examples here and discussed in the paper by citing the pape
     primaryClass={stat.ME}
 }
 ```
-
-![DPmodel](https://github.com/stablemarkets/intro_bayesian_causal/blob/master/Nonparametrics/dp_oscil.png?raw=true)
 
 ### Topics
 
