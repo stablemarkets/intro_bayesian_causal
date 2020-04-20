@@ -1,7 +1,21 @@
 # A Practical Introduction to Bayesian Estimation of Causal Effects: Parametric and Nonparametric Approaches
-## Companion GitHub Repository
 
-The working paper (currently under review) can be found on arXiv: https://arxiv.org/abs/2004.07375 .
+This is the companion GitHub repository for the following working paper (currently under review): https://arxiv.org/abs/2004.07375 .
+
+Please cite the code examples here and discussed in the paper by citing the paper. The BibTex is
+
+```
+@misc{oganisian2020practical,
+    title={A Practical Introduction to Bayesian Estimation of Causal Effects: Parametric and Nonparametric Approaches},
+    author={Arman Oganisian and Jason A. Roy},
+    year={2020},
+    eprint={2004.07375},
+    archivePrefix={arXiv},
+    primaryClass={stat.ME}
+}
+```
+
+![DPmodel](https://github.com/stablemarkets/intro_bayesian_causal/blob/master/Nonparametrics/dp_oscil.png?raw=true)
 
 ### Topics
 
@@ -22,7 +36,7 @@ In terms of Bayesian models we touch upon
 - Bayesian Additive Regression Trees (BART).
 - Gaussian process (GP) priors.
 
-### Software Dependencies.
+### Software Dependencies
 
 ---
 
