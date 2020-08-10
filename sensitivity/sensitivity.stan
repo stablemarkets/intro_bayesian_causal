@@ -18,8 +18,8 @@ model {
   // set priors 
   theta ~ normal(0, 3);
   beta ~ normal(0, 3);
-  delta ~ gamma(1, 1);
-  delta1 ~ normal(0,1);
+  delta ~ gamma(1, 3);
+  delta1 ~ normal(0, 1/sqrt(3) );
   
   // specify likelihood 
   Y ~ normal(A*theta + beta*L, phi);

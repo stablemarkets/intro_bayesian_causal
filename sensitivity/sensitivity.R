@@ -20,7 +20,7 @@ n_draws = iter - warmup
 L = rnorm(N) 
 U = rnorm(N)
 A = rbern(N, prob = invlogit( 0 + 1*L + 1*U ) )
-Y = rnorm(N, mean = 0 + 1*A - 1*L -1*U  , sd = 1 )
+Y = rnorm(N, mean = 0 + 1*A - 1*L -2*U  , sd = 1 )
 
 # P=2 dimensions of model matrix
 X = model.matrix( ~ 1 + A + L )
@@ -33,20 +33,24 @@ sa_model = stan_model(file = "sensitivity.stan")
 stan_res = sampling(sa_model, data = stan_data, 
                     warmup = warmup, iter = iter, chains=1, seed=1)
 
-post_draws = extract(stan_res, pars=c('theta','psi3','psi1','psi2'))
+post_draws = extract(stan_res, pars=c('theta','psi3','psi2','psi1'))
 post_draws = do.call('cbind', post_draws)
 
 ####-------------------         Plot Results            --------------------####
 
 png("sensitivity.png")
-spars = c('$\\Delta \\sim \\delta_0 $', '$\\Delta \\sim N(0,1)$', '$\\Delta \\sim Gam(1,1)$','$\\Delta^* \\sim Gam(1,1)$')
+
+spars = c('$\\Delta \\sim \\delta_0 $', 
+          '$\\Delta \\sim N(0, 3^{-1/2} )$', 
+          '$\\Delta \\sim Gam(1,3)$',
+          '$\\Delta^* \\sim Gam(1,3)$' )
 
 plot(colMeans(post_draws),
      col='blue', pch=20, ylab=TeX("$\\Psi_s$"),axes=F, 
-     ylim=c(-3,3), xlab='Sensitivity Parameter Prior')
+     ylim=c(-2,2), xlab='Sensitivity Parameter Prior')
 
 axis(side = 1, 1:4, labels = TeX(spars),tick = T, padj = .5)
-axis(side = 2, seq(-3,3,1), labels = seq(-3,3,1), tick = T)
+axis(side = 2, seq(-2,2,1), labels = seq(-2,2,1), tick = T)
 
 ### Plot posterior credible Band
 colfunc <- colorRampPalette(c("white", "skyblue"))
