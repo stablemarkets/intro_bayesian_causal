@@ -69,27 +69,29 @@ proc iml;
 
 	/* loop over posterior draws */
 	do i=1 to n_iter; 
-
-		/* Draw from Dirichlet(1,...1) distribution  */
-		alpha= J(n , 1 , 1);
-		bb_w = RandDirichlet(1, alpha);
-		bb_w = bb_w || 1-sum(bb_w);
-		
+	
 		/* loop over strata of V */
 		do v = 1 to 5;
+			nv = sum(X[,6] = v); /* find how many subjects in stratum v */
+			idx = loc(X[,6] = v) ; /* find which obs are in stratum v */
+			/* Draw from Dirichlet(1,...,1) distribution  
+			   to do bayesian bootstrap estimate of P_v(W) */
+			alpha= J(nv , 1 , 1);
+			bb_w = RandDirichlet(1, alpha);
+			bb_w = bb_w || 1-sum(bb_w);
 
 			/* for each strata, compute logit of event 
 			   under treatment 1 and 0: lp1, lp0*/
 
 			/* compute reference group v=1 separately */
 			if v=1 then do;
-				lp1 = pm[i,2] + pm[i, 3]*X[,8] + pm[i, 8];
-				lp0 = pm[i,2] + pm[i, 3]*X[,8];
+				lp1 = pm[i,2] + pm[i, 3]*X[ idx , 8] + pm[i, 8] ;
+				lp0 = pm[i,2] + pm[i, 3]*X[ idx , 8] ;
 			end;
 			
 			if v>1 then do;
-				lp1 = pm[i,2] + pm[i, 3]*X[,8] + pm[i,2+v]  + (pm[i, 8] + pm[i,7+v] );
-				lp0 = pm[i,2] + pm[i, 3]*X[,8] + pm[i,2+v] ;
+				lp1 = pm[i,2] + pm[i, 3]*X[ idx , 8] + pm[i,2+v]  + (pm[i, 8] + pm[i,7+v] ) ;
+				lp0 = pm[i,2] + pm[i, 3]*X[ idx , 8] + pm[i,2+v] ;
 			end;
 			
 			/* inverse logit transform to convert to probability */
@@ -97,7 +99,7 @@ proc iml;
 			p0 = exp(lp0)/(1+exp(lp0));
 			
 			/* bayesian bootstrap average of probability*/
-			/* dot-product: bb_w is 1-X-n vector and p1/p0 are n-X-1  */ 
+			/* dot-product: bb_w is 1-X-n vector and p1, p0 are n-X-1  */ 
 			mu1 = bb_w*p1; 
 			mu0 = bb_w*p0;
 			

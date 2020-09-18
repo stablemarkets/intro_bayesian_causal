@@ -17,23 +17,36 @@ n_draws = iter - warmup
 
 #simulate standard normal confounder (L), dose (A), and outcome (Y)
 W = rnorm(n = N) 
-Wmat = cbind(1, W)
+Wmat = cbind(W) ## could append more covariates here
 
 V = sample(x = 1:5, size = N, replace = T, prob = c(3/10,3/10,2/10,1/10,1/10))
-Vmat = model.matrix(~ -1 + as.factor(V) )[,-1]
+Vmat = model.matrix(~  as.factor(V) )
 
-A = rbern(N, prob = invlogit( 0 + 1*W + Vmat %*% c( -.5,.5,.5,-.5 ) ) )
+A = rbern(N, prob = invlogit( 0 + 1*W + Vmat %*% c(0, -.5,.5,.5,-.5 ) ) )
 
-Y = rbern(N, prob = invlogit( -1 + 1*W  + (1 + Vmat %*% c( -.5,0,.5, .6 ) )*A ) ) 
+Y = rbern(N, prob = invlogit( -1 + 1*W  + (1 + Vmat %*% c(0, -.5,0,.5, .6 ) )*A ) ) 
 
-stan_data = list(Y=Y, A=A, V=Vmat, W = Wmat,
-                 Pw = ncol(Wmat), Pv = ncol(Vmat), N=N)
+## number of subjects in each stratum
+n_v = as.numeric(table(V))
+## get indices of subjects in each stratum (to simplify looping in Stan)
+
+## sort data by stratum (to simplify looping)
+
+stan_data = list(Y =  Y[order(V)], 
+                 A =  A[order(V)], 
+                 V =  Vmat[order(V), , drop = F], 
+                 W = Wmat[order(V), ,drop = F ],
+                 Pw = ncol(Wmat), 
+                 Pv = length(unique(V)), 
+                 N = N,
+                 n_v = n_v, 
+                 ind = c(0, cumsum(n_v)) )
 
 ####------------------------ Sample Posterior    ---------------------------####
 partial_pool_model = stan_model(file = "partial_pool.stan")
 
 stan_res = sampling(partial_pool_model, data = stan_data, 
-                    pars = c("odds_ratio", 'mu', "overall_odds_ratio" ),
+                    pars = c("odds_ratio", "overall_odds_ratio" ),
                     warmup = warmup, iter = iter, chains=1, seed=1)
 
 Psi_draws = extract(stan_res, pars='odds_ratio')[[1]]
@@ -51,9 +64,13 @@ Psi_freq = numeric(5) ## shell to contain causal odds ratios
 for(vf in 1:5){
   vval= as.factor(vf)
   
-  ## standardize over empirical distribution p(W)
-  marg_mean_y1 = mean( predict(freq_reg, data.frame(W, vfac=vval, A=1 ), type='response') )
-  marg_mean_y0 = mean( predict(freq_reg, data.frame(W, vfac=vval, A=0 ), type='response') )
+  ## predict probability under treatment and no treatment
+  p1 = predict(freq_reg, data.frame(W, vfac=vval, A=1 ), type='response')
+  p0 = predict(freq_reg, data.frame(W, vfac=vval, A=0 ), type='response') 
+  
+  ## standardize over empirical distribution Pv(W)
+  marg_mean_y1 = mean( p1[ V==vf ]  )
+  marg_mean_y0 = mean( p0[ V==vf ] )
   
   ## compute causal odds ratio
   Psi_freq[vf] = (marg_mean_y1/(1-marg_mean_y1)) / (marg_mean_y0/(1-marg_mean_y0))
@@ -61,7 +78,7 @@ for(vf in 1:5){
 
 
 ####-------------------         Plot Results            --------------------####
-v_strata = 1:(ncol(Vmat)+1)
+v_strata = ncol(Vmat)
 post_mean = colMeans(Psi_draws)
 
 png("ppooling_plot.png", width = 600, height = 500)
